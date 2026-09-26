@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>カカポを育てる地名タイピング</title>
+  <meta name="description" content="日本の地名をタイピングして、たまごからカカポを育てよう。ふりがな付きのレベル1と、難読地名のレベル2。">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+
+  <!-- OGP（SNSでURLを共有したときの表示） -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="カカポを育てる地名タイピング">
+  <meta property="og:description" content="日本の地名をタイピングして、たまごからカカポを育てよう。ふりがな付きのレベル1と、難読地名のレベル2。">
+  <meta property="og:url" content="https://kakapo-studio.github.io/typing-game/">
+  <meta property="og:image" content="https://kakapo-studio.github.io/typing-game/images/ogp.png">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="app-header">
+    <a class="brand" href="https://kakapo-studio.github.io/">kakapo studio</a>
+  </header>
+
+  <main class="app">
+
+    <!-- ===== タイトル画面 ===== -->
+    <section class="screen" id="title-screen">
+      <div class="title-egg" id="titleEgg"></div>
+      <h1>カカポを育てる<br>地名タイピング</h1>
+      <p class="lead">日本の地名をタイピングして、たまごからカカポを育てよう。<br>全20問、ぜんぶ正解すると、おとなのカカポになるよ。</p>
+
+      <div class="level-select">
+        <button class="level-card" type="button" data-level="1">
+          <span class="level-num">レベル1</span>
+          <strong>ふりがなあり</strong>
+          <span class="level-desc">おなじみの地名</span>
+          <span class="best" id="best1"></span>
+        </button>
+        <button class="level-card" type="button" data-level="2">
+          <span class="level-num">レベル2</span>
+          <strong>難読地名</strong>
+          <span class="level-desc">漢字だけ。読めるかな？</span>
+          <span class="best" id="best2"></span>
+        </button>
+      </div>
+
+      <p class="note">キーボードでローマ字入力します。日本語入力はオフ（半角英数）にしてね。</p>
+      <p class="note mobile-note">※ スマホではキーボード入力ができないため、PCで遊んでください。</p>
+    </section>
+
+    <!-- ===== カウントダウン ===== -->
+    <section class="screen" id="countdown-screen" hidden>
+      <p class="countdown" id="countdown">3</p>
+    </section>
+
+    <!-- ===== プレイ画面 ===== -->
+    <section class="screen" id="play-screen" hidden>
+      <div class="play-status">
+        <span id="progress">1 / 20</span>
+        <span id="timer">0.0 秒</span>
+      </div>
+
+      <div class="play-main">
+        <!-- カカポの巣 -->
+        <div class="nest">
+          <!-- カカポと、小石・リムの実などの演出を重ねる場所 -->
+          <div class="stage-wrap">
+            <div class="kakapo-stage" id="kakapoStage"></div>
+            <div class="effects" id="effects" aria-hidden="true"></div>
+          </div>
+          <p class="stage-name" id="stageName">たまご</p>
+          <div class="growth-bar"><div id="growthFill"></div></div>
+        </div>
+
+        <!-- 問題 -->
+        <div class="question-card" id="questionCard">
+          <p class="pref" id="pref"></p>
+          <p class="furigana" id="furigana"></p>
+          <p class="kanji" id="kanji"></p>
+          <p class="reading" id="reading"></p>
+          <p class="romaji" id="romaji"><span class="typed" id="typed"></span><span class="rest" id="rest"></span></p>
+          <p class="message" id="message" aria-live="polite"></p>
+        </div>
+      </div>
+
+      <div class="play-actions">
+        <button type="button" id="hintButton">ヒント <kbd>Space</kbd></button>
+        <button type="button" id="skipButton">スキップ <kbd>Esc</kbd></button>
+        <button type="button" id="quitButton" class="quit">やめる</button>
+      </div>
+      <p class="ime-warning" id="imeWarning" hidden>日本語入力がオンになっています。半角英数に切り替えてね</p>
+    </section>
+
+    <!-- ===== 結果画面 ===== -->
+    <section class="screen" id="result-screen" hidden>
+      <div class="result-kakapo" id="resultKakapo"></div>
+      <p class="result-stage" id="resultStage"></p>
+      <p class="result-message" id="resultMessage"></p>
+      <p class="new-record" id="newRecord" hidden>ベストタイム更新！</p>
+
+      <dl class="result-stats">
+        <div><dt>タイム</dt><dd id="resultTime"></dd></div>
+        <div><dt>正解</dt><dd id="resultCorrect"></dd></div>
+        <div><dt>ミスタイプ</dt><dd id="resultMiss"></dd></div>
+        <div><dt>正確さ</dt><dd id="resultAccuracy"></dd></div>
+      </dl>
+
+      <!-- SNS でシェア -->
+      <div class="share">
+        <p class="share-title">結果をシェアする</p>
+        <div class="share-buttons">
+          <a class="share-button" id="shareX" href="#" target="_blank" rel="noopener">X でポスト</a>
+          <a class="share-button" id="shareLine" href="#" target="_blank" rel="noopener">LINE で送る</a>
+          <button type="button" class="share-button" id="copyResult">結果をコピー</button>
+        </div>
+        <p class="copy-message" id="copyMessage" aria-live="polite"></p>
+      </div>
+
+      <div class="result-actions">
+        <button type="button" class="button" id="retryButton">もう一度</button>
+        <button type="button" class="button is-outline" id="backButton">レベル選択へ</button>
+      </div>
+
+      <details class="answer-list">
+        <summary>今回の地名と読み方</summary>
+        <ol id="answerList"></ol>
+      </details>
+    </section>
+
+  </main>
+
+  <script src="romaji.js"></script>
+  <script src="stages.js"></script>
+  <script src="questions.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
